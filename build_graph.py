@@ -60,6 +60,10 @@ degrees = dict(G.degree())
 net = Network(height="90vh", width="100%", bgcolor="#ffffff", font_color="black", directed=False, cdn_resources='in_line')
 net.set_options("""
 var options = {
+  "configure": {
+    "enabled": true,
+    "filter": ["physics", "nodes", "edges"]
+  },
   "nodes": { "shape": "circle", "font": { "size": 14, "face": "tahoma", "color": "black" }, "borderWidth": 2, "scaling": { "min": 25, "max": 80, "label": { "enabled": true, "min": 14, "max": 24 } } },
   "edges": { "smooth": { "type": "curvedCW", "roundness": 0.15 }, "arrows": { "to": { "enabled": false } } },
   "physics": { "forceAtlas2Based": { "gravitationalConstant": -80, "centralGravity": 0.01, "springLength": 80, "springConstant": 0.08, "avoidOverlap": 0.5, "damping": 1 }, "minVelocity": 0.75, "solver": "forceAtlas2Based", "stabilization": { "enabled": true, "iterations": 2000, "updateInterval": 25, "fit": true } },
@@ -127,8 +131,6 @@ custom_js = """
     });
 </script>
 """
-
-net.show_buttons(filter_=['physics', 'nodes', 'edges'])
 
 output_file = "index.html"
 html_content = net.generate_html()
