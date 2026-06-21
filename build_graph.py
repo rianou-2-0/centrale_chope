@@ -64,13 +64,15 @@ var options = {
     "borderWidth": 2,
     "font": {
       "color": "black",
-      "face": "tahoma"
+      "face": "tahoma",
+      "size": 14
     },
     "scaling": {
       "min": 30,
       "max": 100,
       "label": {
         "enabled": true,
+        "min": 14,
         "max": 24
       }
     },
@@ -88,12 +90,20 @@ var options = {
   "physics": {
     "forceAtlas2Based": {
       "gravitationalConstant": -80,
+      "centralGravity": 0.01,
       "springLength": 80,
-      "damping": 1,
-      "avoidOverlap": 0.5
+      "springConstant": 0.08,
+      "avoidOverlap": 0.5,
+      "damping": 1
     },
     "minVelocity": 0.75,
-    "solver": "forceAtlas2Based"
+    "solver": "forceAtlas2Based",
+    "stabilization": {
+      "enabled": true,
+      "iterations": 2000,
+      "updateInterval": 25,
+      "fit": true
+    }
   },
   "interaction": {
     "hover": true,
