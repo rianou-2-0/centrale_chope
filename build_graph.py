@@ -62,7 +62,6 @@ net.set_options("""
 var options = {
   "nodes": {
     "borderWidth": 2,
-    "opacity": null,
     "font": {
       "color": "black",
       "face": "tahoma"
@@ -72,22 +71,18 @@ var options = {
       "max": 100,
       "label": {
         "enabled": true,
-        "max": 24,
-        "maxVisible": null,
-        "drawThreshold": null
+        "max": 24
       }
     },
-    "shape": "circle",
-    "size": null
+    "shape": "circle"
   },
   "edges": {
-    "selfReferenceSize": null,
-    "selfReference": {
-      "angle": 0.7853981633974483
-    },
     "smooth": {
-      "forceDirection": "vertical",
+      "type": "curvedCW",
       "roundness": 0.15
+    },
+    "arrows": { 
+      "to": { "enabled": false } 
     }
   },
   "physics": {

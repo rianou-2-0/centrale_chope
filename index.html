@@ -392,7 +392,7 @@ function highlightFilter(filter) {
                   // adding nodes and edges to the graph
                   data = {nodes: nodes, edges: edges};
 
-                  var options = {"nodes": {"borderWidth": 2, "opacity": null, "font": {"color": "black", "face": "tahoma"}, "scaling": {"min": 30, "max": 100, "label": {"enabled": true, "max": 24, "maxVisible": null, "drawThreshold": null}}, "shape": "circle", "size": null}, "edges": {"selfReferenceSize": null, "selfReference": {"angle": 0.7853981633974483}, "smooth": {"forceDirection": "vertical", "roundness": 0.15}}, "physics": {"forceAtlas2Based": {"gravitationalConstant": -80, "springLength": 80, "damping": 1, "avoidOverlap": 0.5}, "minVelocity": 0.75, "solver": "forceAtlas2Based"}, "interaction": {"hover": true, "multiselect": true}};
+                  var options = {"nodes": {"borderWidth": 2, "font": {"color": "black", "face": "tahoma"}, "scaling": {"min": 30, "max": 100, "label": {"enabled": true, "max": 24}}, "shape": "circle"}, "edges": {"smooth": {"type": "curvedCW", "roundness": 0.15}, "arrows": {"to": {"enabled": false}}}, "physics": {"forceAtlas2Based": {"gravitationalConstant": -80, "springLength": 80, "damping": 1, "avoidOverlap": 0.5}, "minVelocity": 0.75, "solver": "forceAtlas2Based"}, "interaction": {"hover": true, "multiselect": true}};
 
                   
 
