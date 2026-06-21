@@ -60,14 +60,50 @@ degrees = dict(G.degree())
 net = Network(height="90vh", width="100%", bgcolor="#ffffff", font_color="black", directed=False, cdn_resources='in_line')
 net.set_options("""
 var options = {
-  "configure": {
-    "enabled": true,
-    "filter": ["physics", "nodes", "edges"]
+  "nodes": {
+    "borderWidth": 2,
+    "opacity": null,
+    "font": {
+      "color": "black",
+      "face": "tahoma"
+    },
+    "scaling": {
+      "min": 30,
+      "max": 100,
+      "label": {
+        "enabled": true,
+        "max": 24,
+        "maxVisible": null,
+        "drawThreshold": null
+      }
+    },
+    "shape": "circle",
+    "size": null
   },
-  "nodes": { "shape": "circle", "font": { "size": 14, "face": "tahoma", "color": "black" }, "borderWidth": 2, "scaling": { "min": 25, "max": 80, "label": { "enabled": true, "min": 14, "max": 24 } } },
-  "edges": { "smooth": { "type": "curvedCW", "roundness": 0.15 }, "arrows": { "to": { "enabled": false } } },
-  "physics": { "forceAtlas2Based": { "gravitationalConstant": -80, "centralGravity": 0.01, "springLength": 80, "springConstant": 0.08, "avoidOverlap": 0.5, "damping": 1 }, "minVelocity": 0.75, "solver": "forceAtlas2Based", "stabilization": { "enabled": true, "iterations": 2000, "updateInterval": 25, "fit": true } },
-  "interaction": { "hover": true, "multiselect": true }
+  "edges": {
+    "selfReferenceSize": null,
+    "selfReference": {
+      "angle": 0.7853981633974483
+    },
+    "smooth": {
+      "forceDirection": "vertical",
+      "roundness": 0.15
+    }
+  },
+  "physics": {
+    "forceAtlas2Based": {
+      "gravitationalConstant": -80,
+      "springLength": 80,
+      "damping": 1,
+      "avoidOverlap": 0.5
+    },
+    "minVelocity": 0.75,
+    "solver": "forceAtlas2Based"
+  },
+  "interaction": {
+    "hover": true,
+    "multiselect": true
+  }
 }
 """)
 
