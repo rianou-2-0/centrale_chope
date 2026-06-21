@@ -5,21 +5,9 @@ from pyvis.network import Network
 # --- 1. CONFIGURATION DU GOOGLE SHEET ---
 SHEET_ID = "13qV-mhDlUloySMoqU6YBwDNdSDjocfXbVNz99RTtVT0"
 GID = "390021334"
-# URL magique pour télécharger l'onglet directement en CSV
 url_csv = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid={GID}"
 
-
-# --- 2. CATÉGORIES ET COULEURS (En dur pour le moment) ---
-groupes = {
-    "CentraleH": ["Alan", "Antoine", "Anton", "Arsène", "Arthur", "Bastien", "Bastien Nostra", "Clem Neuil", "Ethan", "Etienne", "Étienne", "Florian", "Hugo Thubes", "Jules", "Lucien", "Marin Yards", "Martin", "Matteo", "Mehdi", "Matthias", "Maxime", "Milan", "Nowa", "Paul", "Roméo",  "Sacha", "Simon", "Tao", "Ulysse", "Virgile", "Romain"],
-    "CentraleF": ["Amandine",  "Belen", "Cléa", "Coline", "Elisa", "Faustine", "Jade", "Jasmine", "Joséphine", "Juliette Bross", "Kimlan", "Laure", "Lisa", "Lorraine", "Louise G3 césuré", "Lucie", "Nina", "Ninon",  "Noémie", "Rulin", "Sarah", "Sophie", "Yasmine"],
-    "IteemH": ["Nathanaël", "Pacôme", "William"],
-    "IteemF": ["Camille", "Juliette Iteem", "Margaux", "Nina Iteem", "Lila"],
-    "ChimieH" : ["Thibault"],
-    "ChimieF" : ["Cléo", "Ellina", "Jeanne Mads"],
-    "Autre": ["Clara Joy", "Giono", "Lise-Anaïs Joy", "Leandre", "Marceau CS", "Meuf The Room", "Meuf la catho 1", "Meuf la catho 2", "Oscar Pote de Lucien", "Roméo CS"]
-}
-
+# --- 2. COULEURS ---
 color_map = {
     "CentraleH": "#3e84ca", "CentraleF": "#66b3ff", 
     "IteemH": "#00954A", "IteemF": "#00cc66", 
@@ -28,35 +16,54 @@ color_map = {
 }
 DEFAULT_COLOR = "#cccccc"
 
-
 # --- 3. RÉCUPÉRATION DES DONNÉES ---
 try:
-    # On lit le CSV. pandas va détecter automatiquement les colonnes "Homme" et "Fille"
     df = pd.read_csv(url_csv)
-    # On supprime les lignes vides au cas où
-    df = df.dropna(subset=['Homme', 'Fille'])
+    
+    # On utilise l'index des colonnes pour être robuste (0=Homme, 1=Cat_H, 2=Fille, 3=Cat_F)
+    cols = df.columns
+    col_homme = cols[0]
+    col_cat_h = cols[1]
+    col_fille = cols[2]
+    col_cat_f = cols[3]
+    
+    # Suppression des lignes où il n'y a ni Homme ni Fille
+    df = df.dropna(subset=[col_homme, col_fille])
 except Exception as e:
     print(f"Erreur lors de la lecture du Google Sheet : {e}")
     exit(1)
 
-
-# --- 4. CALCULS RÉSEAU ---
+# --- 4. EXTRACTION DES CATÉGORIES ET CALCULS RÉSEAU ---
 G = nx.Graph()
+category_dict = {}
 
-# Ajout des liens à partir des colonnes "Homme" et "Fille"
 for index, row in df.iterrows():
-    source = str(row['Homme']).strip()
-    target = str(row['Fille']).strip()
-    G.add_edge(source, target)
+    homme = str(row[col_homme]).strip()
+    fille = str(row[col_fille]).strip()
+    
+    # Récupération de la catégorie Homme (si elle existe et n'est pas vide)
+    cat_h = str(row[col_cat_h]).strip()
+    if cat_h and cat_h.lower() != 'nan':
+        category_dict[homme] = cat_h
+        
+    # Récupération de la catégorie Fille (si elle existe et n'est pas vide)
+    cat_f = str(row[col_cat_f]).strip()
+    if cat_f and cat_f.lower() != 'nan':
+        category_dict[fille] = cat_f
+
+    # Ajout du lien
+    G.add_edge(homme, fille)
 
 degrees = dict(G.degree())
 
-
 # --- 5. CONFIGURATION WEB ---
 net = Network(height="90vh", width="100%", bgcolor="#ffffff", font_color="black", directed=False, cdn_resources='in_line')
-
 net.set_options("""
 var options = {
+  "configure": {
+    "enabled": true,
+    "filter": ["physics", "nodes", "edges"]
+  },
   "nodes": { "shape": "circle", "font": { "size": 14, "face": "tahoma", "color": "black" }, "borderWidth": 2, "scaling": { "min": 25, "max": 80, "label": { "enabled": true, "min": 14, "max": 24 } } },
   "edges": { "smooth": { "type": "curvedCW", "roundness": 0.15 }, "arrows": { "to": { "enabled": false } } },
   "physics": { "forceAtlas2Based": { "gravitationalConstant": -80, "centralGravity": 0.01, "springLength": 80, "springConstant": 0.08, "avoidOverlap": 0.5, "damping": 1 }, "minVelocity": 0.75, "solver": "forceAtlas2Based", "stabilization": { "enabled": true, "iterations": 2000, "updateInterval": 25, "fit": true } },
@@ -64,28 +71,20 @@ var options = {
 }
 """)
 
-
 # --- 6. ATTRIBUTION DES COULEURS ET AJOUT AU GRAPHE ---
 for node in G.nodes():
-    # Chercher à quel groupe appartient la personne
-    node_color = DEFAULT_COLOR
-    for groupe, membres in groupes.items():
-        if node in membres:
-            node_color = color_map[groupe]
-            break
-            
+    # Cherche la catégorie du noeud, sinon applique "Inconnu" et la couleur par défaut
+    groupe = category_dict.get(node, "Inconnu")
+    node_color = color_map.get(groupe, DEFAULT_COLOR)
     deg = degrees.get(node, 1)
-    net.add_node(node, label=node, title=f"{node} : {deg} connexions", color=node_color, value=deg)
+    
+    net.add_node(node, label=node, title=f"{node} : {deg} connexions ({groupe})", color=node_color, value=deg)
 
 for source, target in G.edges():
-    # Par défaut, le lien prend la couleur de la cible (Fille) pour garder ta logique initiale
-    edge_color = DEFAULT_COLOR
-    for groupe, membres in groupes.items():
-        if target in membres:
-            edge_color = color_map[groupe]
-            break
+    # Le lien prend la couleur de la cible (Fille)
+    groupe_target = category_dict.get(target, "Inconnu")
+    edge_color = color_map.get(groupe_target, DEFAULT_COLOR)
     net.add_edge(source, target, color=edge_color)
-
 
 # --- 7. INJECTION DU SCRIPT HIGHLIGHT ET SAUVEGARDE ---
 custom_js = """
@@ -93,12 +92,10 @@ custom_js = """
     network.on("click", function (params) {
         var allNodes = nodes.get();
         var allEdges = edges.get();
-        
         if (params.nodes.length > 0) {
             var clickedNodeId = params.nodes[0];
             var connectedNodes = network.getConnectedNodes(clickedNodeId);
             var connectedEdges = network.getConnectedEdges(clickedNodeId);
-            
             var newNodes = [];
             for (var i = 0; i < allNodes.length; i++) {
                 var node = allNodes[i];
@@ -108,7 +105,6 @@ custom_js = """
                 newNodes.push(node);
             }
             nodes.update(newNodes);
-            
             var newEdges = [];
             for (var i = 0; i < allEdges.length; i++) {
                 var edge = allEdges[i];
@@ -125,7 +121,6 @@ custom_js = """
                 if (node.originalColor !== undefined) { node.color = node.originalColor; newNodes.push(node); }
             }
             nodes.update(newNodes);
-            
             var newEdges = [];
             for (var i = 0; i < allEdges.length; i++) {
                 var edge = allEdges[i];
@@ -144,4 +139,4 @@ html_content = html_content.replace('</body>', custom_js + '</body>')
 with open(output_file, "w", encoding="utf-8") as f:
     f.write(html_content)
 
-print("Graphe généré avec succès à partir du Google Sheet !")
+print("Graphe généré avec succès à partir du nouveau Google Sheet !")
