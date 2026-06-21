@@ -14,7 +14,7 @@ color_map = {
     "ChimieH": "#ff9705", "ChimieF": "#ffcc00", 
     "Autre": "#cccccc"
 }
-DEFAULT_COLOR = "#cccccc"
+DEFAULT_COLOR = "#808080"
 
 # --- 3. RÉCUPÉRATION DES DONNÉES ---
 try:
